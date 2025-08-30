@@ -39,6 +39,10 @@ const getPageTitle = (pathname: string) => {
       return 'Document Comparison';
     case '/e-signature':
       return 'E-Signature';
+    case '/settings':
+      return 'Settings';
+    case '/support':
+      return 'Support';
     default:
       return 'Dashboard';
   }

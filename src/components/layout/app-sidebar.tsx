@@ -63,16 +63,16 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Settings">
-                <Link href="#">
+              <SidebarMenuButton asChild tooltip="Settings" isActive={pathname === '/settings'}>
+                <Link href="/settings">
                   <Settings />
                   <span>Settings</span>
                 </Link>
               </SidebarMenuButton>
            </SidebarMenuItem>
            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Support">
-                <Link href="#">
+              <SidebarMenuButton asChild tooltip="Support" isActive={pathname === '/support'}>
+                <Link href="/support">
                   <LifeBuoy />
                   <span>Support</span>
                 </Link>

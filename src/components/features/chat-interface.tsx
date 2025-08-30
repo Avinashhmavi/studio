@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 interface Message {
   id: number;
@@ -23,7 +25,7 @@ export function ChatInterface() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { jurisdiction } = useJurisdiction();
+  const { jurisdiction, setJurisdiction } = useJurisdiction();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,8 +74,26 @@ export function ChatInterface() {
   return (
     <Card className="h-[calc(100vh-10rem)] flex flex-col">
         <CardHeader>
-            <CardTitle>Legal Q&A Chatbot</CardTitle>
-            <CardDescription>Ask common legal questions and get AI-powered answers for the selected jurisdiction.</CardDescription>
+            <div className='flex justify-between items-start'>
+                <div>
+                    <CardTitle>Legal Q&A Chatbot</CardTitle>
+                    <CardDescription>Ask common legal questions and get AI-powered answers.</CardDescription>
+                </div>
+                <div className="space-y-1.5">
+                    <Label htmlFor="jurisdiction-chat">Jurisdiction</Label>
+                    <Select value={jurisdiction} onValueChange={setJurisdiction}>
+                        <SelectTrigger className="w-[180px]" id="jurisdiction-chat">
+                            <SelectValue placeholder="Select Jurisdiction" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="California">California</SelectItem>
+                            <SelectItem value="New York">New York</SelectItem>
+                            <SelectItem value="Texas">Texas</SelectItem>
+                            <SelectItem value="Federal">Federal</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
             <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
