@@ -34,6 +34,8 @@ const getPageTitle = (pathname: string) => {
       return 'AI Negotiation Support';
     case '/document-storage':
       return 'My Documents';
+    case '/document-comparison':
+      return 'Document Comparison';
     default:
       return 'Dashboard';
   }

@@ -19,11 +19,13 @@ import {
   Folder,
   Settings,
   LifeBuoy,
+  GitCompareArrows,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/document-comparison', label: 'Compare Documents', icon: GitCompareArrows },
   { href: '/contract-generation', label: 'Contract Templates', icon: FileText },
   { href: '/legal-qa', label: 'Legal Q&A', icon: MessageSquare },
   { href: '/negotiation-support', label: 'Negotiation', icon: Gavel },
