@@ -12,3 +12,4 @@ import '@/ai/flows/analyze-precedents.ts';
 import '@/ai/flows/generate-contract.ts';
 import '@/ai/flows/due-diligence.ts';
 import '@/ai/flows/generate-workflow.ts';
+import '@/ai/flows/estimate-legal-costs.ts';

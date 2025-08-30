@@ -26,6 +26,7 @@ import {
   Workflow,
   ShieldCheck,
   Briefcase,
+  Calculator,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
@@ -41,6 +42,7 @@ const menuItems = [
   { href: '/guided-workflows', label: 'Guided Workflows', icon: Workflow },
   { href: '/matter-management', label: 'Matter Management', icon: Briefcase },
   { href: '/e-signature', label: 'E-Signature', icon: Signature },
+  { href: '/cost-estimation', label: 'Cost Estimator', icon: Calculator },
 ];
 
 export function AppSidebar() {
