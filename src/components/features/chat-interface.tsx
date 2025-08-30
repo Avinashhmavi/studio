@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -13,6 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { JURISDICTIONS } from '@/lib/jurisdictions';
 
 interface Message {
   id: number;
@@ -86,10 +88,9 @@ export function ChatInterface() {
                             <SelectValue placeholder="Select Jurisdiction" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="California">California</SelectItem>
-                            <SelectItem value="New York">New York</SelectItem>
-                            <SelectItem value="Texas">Texas</SelectItem>
-                            <SelectItem value="Federal">Federal</SelectItem>
+                            {JURISDICTIONS.map((j) => (
+                                <SelectItem key={j.value} value={j.value}>{j.label}</SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>

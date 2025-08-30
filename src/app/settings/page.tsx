@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
+import { JURISDICTIONS } from '@/lib/jurisdictions';
 
 export default function SettingsPage() {
     const { jurisdiction, setJurisdiction } = useJurisdiction();
@@ -23,10 +24,9 @@ export default function SettingsPage() {
                             <SelectValue placeholder="Select Jurisdiction" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="California">California</SelectItem>
-                            <SelectItem value="New York">New York</SelectItem>
-                            <SelectItem value="Texas">Texas</SelectItem>
-                            <SelectItem value="Federal">Federal</SelectItem>
+                            {JURISDICTIONS.map((j) => (
+                                <SelectItem key={j.value} value={j.value}>{j.label}</SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                     <p className="text-sm text-muted-foreground">
