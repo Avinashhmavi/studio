@@ -180,17 +180,18 @@ export function GuidedWorkflows() {
                 
                 {result.youtubeLinks && result.youtubeLinks.length > 0 && (
                     <div className='pt-4'>
-                        <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                           <Youtube className="h-5 w-5" />
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                           <Youtube className="h-6 w-6 text-red-600" />
                            Helpful Videos
                         </h3>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {result.youtubeLinks.map((link, index) => (
-                                <Card key={index}>
-                                    <CardContent className="p-3">
-                                        <Link href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+                                <Card key={index} className="hover:bg-muted/50 transition-colors">
+                                    <CardContent className="p-4">
+                                        <Link href={link.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
                                             {link.title}
                                         </Link>
+                                        <p className="text-xs text-muted-foreground mt-1 truncate">{link.url}</p>
                                     </CardContent>
                                 </Card>
                             ))}

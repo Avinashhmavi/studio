@@ -48,7 +48,7 @@ Your task is to generate a clear, comprehensive, and easy-to-follow workflow for
 
 Start by creating a title for the workflow. Then, provide a series of steps. Each step must have a clear title and detailed content explaining what to do.
 
-Finally, search for and include up to 3 relevant, high-quality YouTube videos that provide a good visual or detailed explanation of the process. Provide the title and full URL for each video.
+Finally, search for and include up to 3 relevant, high-quality, and publicly available YouTube videos that provide a good visual or detailed explanation of the process. IMPORTANT: Ensure the video URLs are valid and the videos are not private or unavailable. Provide the title and the full, valid URL for each video.
 
 Jurisdiction: {{{jurisdiction}}}
 Legal Topic: {{{topic}}}
