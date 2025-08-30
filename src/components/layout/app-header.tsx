@@ -47,6 +47,8 @@ const getPageTitle = (pathname: string) => {
       return 'Document Comparison';
     case '/e-signature':
       return 'E-Signature';
+    case '/due-diligence':
+        return 'Due Diligence';
     case '/settings':
       return 'Settings';
     case '/support':

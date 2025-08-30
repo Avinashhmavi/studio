@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -24,6 +25,7 @@ import {
   Search,
   BookCopy,
   Workflow,
+  ShieldCheck,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
@@ -32,6 +34,7 @@ const menuItems = [
   { href: '/case-law-search', label: 'Case Law Search', icon: Search },
   { href: '/precedent-analysis', label: 'Precedent Analysis', icon: BookCopy },
   { href: '/document-comparison', label: 'Compare Documents', icon: GitCompareArrows },
+  { href: '/due-diligence', label: 'Due Diligence', icon: ShieldCheck },
   { href: '/contract-generation', label: 'Contract Generator', icon: FileText },
   { href: '/legal-qa', label: 'Legal Q&A', icon: MessageSquare },
   { href: '/negotiation-support', label: 'Negotiation', icon: Gavel },

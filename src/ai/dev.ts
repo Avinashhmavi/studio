@@ -1,3 +1,4 @@
+
 import { config } from 'dotenv';
 config();
 
@@ -9,3 +10,4 @@ import '@/ai/flows/sign-document.ts';
 import '@/ai/flows/search-case-law.ts';
 import '@/ai/flows/analyze-precedents.ts';
 import '@/ai/flows/generate-contract.ts';
+import '@/ai/flows/due-diligence.ts';
