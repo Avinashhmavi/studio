@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, FileQuestion, Loader2 } from 'lucide-react';
+import { CheckCircle, FileQuestion, Loader2, Youtube } from 'lucide-react';
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
 import {
   generateWorkflow,
@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { JURISDICTIONS } from '@/lib/jurisdictions';
+import Link from 'next/link';
 
 const workflowTopics = [
   {
@@ -176,6 +177,26 @@ export function GuidedWorkflows() {
                     </AccordionItem>
                   ))}
                 </Accordion>
+                
+                {result.youtubeLinks && result.youtubeLinks.length > 0 && (
+                    <div className='pt-4'>
+                        <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                           <Youtube className="h-5 w-5" />
+                           Helpful Videos
+                        </h3>
+                        <div className="space-y-2">
+                            {result.youtubeLinks.map((link, index) => (
+                                <Card key={index}>
+                                    <CardContent className="p-3">
+                                        <Link href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+                                            {link.title}
+                                        </Link>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
               </div>
             )}
           </CardContent>

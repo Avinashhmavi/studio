@@ -25,6 +25,12 @@ const GenerateWorkflowOutputSchema = z.object({
             content: z.string().describe('The detailed content of the workflow step.'),
         })
     ).describe('A list of steps for the legal workflow.'),
+    youtubeLinks: z.array(
+        z.object({
+            title: z.string().describe('The title of the YouTube video.'),
+            url: z.string().url().describe('The URL of the YouTube video.'),
+        })
+    ).optional().describe('A list of relevant YouTube videos explaining the process.'),
 });
 export type GenerateWorkflowOutput = z.infer<typeof GenerateWorkflowOutputSchema>;
 
@@ -41,6 +47,8 @@ const prompt = ai.definePrompt({
 Your task is to generate a clear, comprehensive, and easy-to-follow workflow for the given topic and jurisdiction. Always include a disclaimer that the information is not legal advice.
 
 Start by creating a title for the workflow. Then, provide a series of steps. Each step must have a clear title and detailed content explaining what to do.
+
+Finally, search for and include up to 3 relevant, high-quality YouTube videos that provide a good visual or detailed explanation of the process. Provide the title and full URL for each video.
 
 Jurisdiction: {{{jurisdiction}}}
 Legal Topic: {{{topic}}}
