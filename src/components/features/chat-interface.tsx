@@ -10,6 +10,7 @@ import { answerLegalQuestions } from '@/ai/flows/answer-legal-questions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useJurisdiction } from '@/contexts/jurisdiction-context';
 
 interface Message {
   id: number;
@@ -22,6 +23,7 @@ export function ChatInterface() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { jurisdiction } = useJurisdiction();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,7 +45,6 @@ export function ChatInterface() {
     setIsLoading(true);
 
     try {
-      const jurisdiction = "California";
       const question = `In the jurisdiction of ${jurisdiction}, ${input}`;
       
       const result = await answerLegalQuestions({ question });
@@ -72,7 +73,7 @@ export function ChatInterface() {
     <Card className="h-[calc(100vh-10rem)] flex flex-col">
         <CardHeader>
             <CardTitle>Legal Q&A Chatbot</CardTitle>
-            <CardDescription>Ask common legal questions and get AI-powered answers.</CardDescription>
+            <CardDescription>Ask common legal questions and get AI-powered answers for the selected jurisdiction.</CardDescription>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
             <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>

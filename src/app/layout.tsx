@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { AppHeader } from '@/components/layout/app-header';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { JurisdictionProvider } from '@/contexts/jurisdiction-context';
 
 export const metadata: Metadata = {
   title: 'LegAI',
@@ -28,13 +29,15 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('font-body antialiased')}>
-        <SidebarProvider defaultOpen={true}>
-            <AppSidebar />
-            <SidebarInset>
-                <AppHeader />
-                <main className="p-4 sm:p-6 lg:p-8">{children}</main>
-            </SidebarInset>
-        </SidebarProvider>
+        <JurisdictionProvider>
+          <SidebarProvider defaultOpen={true}>
+              <AppSidebar />
+              <SidebarInset>
+                  <AppHeader />
+                  <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+              </SidebarInset>
+          </SidebarProvider>
+        </JurisdictionProvider>
         <Toaster />
       </body>
     </html>

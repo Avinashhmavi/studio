@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
+import { useJurisdiction } from '@/contexts/jurisdiction-context';
+
 
 const getPageTitle = (pathname: string) => {
   switch (pathname) {
@@ -45,7 +46,7 @@ const getPageTitle = (pathname: string) => {
 
 export function AppHeader() {
   const pathname = usePathname();
-  const [jurisdiction, setJurisdiction] = useState('california');
+  const { jurisdiction, setJurisdiction } = useJurisdiction();
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
@@ -59,10 +60,10 @@ export function AppHeader() {
             <SelectValue placeholder="Select Jurisdiction" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="california">California</SelectItem>
-            <SelectItem value="new-york">New York</SelectItem>
-            <SelectItem value="texas">Texas</SelectItem>
-            <SelectItem value="federal">Federal</SelectItem>
+            <SelectItem value="California">California</SelectItem>
+            <SelectItem value="New York">New York</SelectItem>
+            <SelectItem value="Texas">Texas</SelectItem>
+            <SelectItem value="Federal">Federal</SelectItem>
           </SelectContent>
         </Select>
         <DropdownMenu>
