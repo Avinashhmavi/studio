@@ -24,6 +24,9 @@ import {
   type GenerateWorkflowOutput,
 } from '@/ai/flows/generate-workflow';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { JURISDICTIONS } from '@/lib/jurisdictions';
 
 const workflowTopics = [
   {
@@ -41,7 +44,7 @@ const workflowTopics = [
 ];
 
 export function GuidedWorkflows() {
-  const { jurisdiction } = useJurisdiction();
+  const { jurisdiction, setJurisdiction } = useJurisdiction();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
@@ -78,6 +81,19 @@ export function GuidedWorkflows() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="jurisdiction-workflow">Jurisdiction</Label>
+                <Select value={jurisdiction} onValueChange={setJurisdiction} disabled={isLoading}>
+                    <SelectTrigger id="jurisdiction-workflow">
+                        <SelectValue placeholder="Select Jurisdiction" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {JURISDICTIONS.map((j) => (
+                            <SelectItem key={j.value} value={j.value}>{j.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
             <p className="text-sm font-medium text-muted-foreground">
               Select a workflow:
             </p>
