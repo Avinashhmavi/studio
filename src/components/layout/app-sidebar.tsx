@@ -22,12 +22,14 @@ import {
   GitCompareArrows,
   Signature,
   Search,
+  BookCopy,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/case-law-search', label: 'Case Law Search', icon: Search },
+  { href: '/precedent-analysis', label: 'Precedent Analysis', icon: BookCopy },
   { href: '/document-comparison', label: 'Compare Documents', icon: GitCompareArrows },
   { href: '/contract-generation', label: 'Contract Templates', icon: FileText },
   { href: '/legal-qa', label: 'Legal Q&A', icon: MessageSquare },

@@ -7,3 +7,4 @@ import '@/ai/flows/analyze-legal-documents.ts';
 import '@/ai/flows/compare-legal-documents.ts';
 import '@/ai/flows/sign-document.ts';
 import '@/ai/flows/search-case-law.ts';
+import '@/ai/flows/analyze-precedents.ts';

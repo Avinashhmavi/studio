@@ -31,6 +31,8 @@ const getPageTitle = (pathname: string) => {
       return 'Document Analysis';
     case '/case-law-search':
         return 'Case Law Search';
+    case '/precedent-analysis':
+        return 'Precedent Analysis';
     case '/contract-generation':
       return 'Contract Generation';
     case '/legal-qa':
