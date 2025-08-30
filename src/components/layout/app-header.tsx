@@ -29,6 +29,8 @@ const getPageTitle = (pathname: string) => {
   switch (pathname) {
     case '/':
       return 'Document Analysis';
+    case '/case-law-search':
+        return 'Case Law Search';
     case '/contract-generation':
       return 'Contract Generation';
     case '/legal-qa':
