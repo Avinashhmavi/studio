@@ -13,109 +13,177 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { FileUp, Signature, CheckCircle } from 'lucide-react';
+import { FileUp, Signature, CheckCircle, Loader2, Download } from 'lucide-react';
+import { signDocument } from '@/ai/flows/sign-document';
 
 export function ESignature() {
   const [file, setFile] = useState<File | null>(null);
   const [signerName, setSignerName] = useState('');
-  const [isSigned, setIsSigned] = useState(false);
+  const [signedContent, setSignedContent] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      if (selectedFile.type !== 'text/plain') {
+        toast({
+          variant: 'destructive',
+          title: 'Unsupported File Type',
+          description: 'Currently, only .txt files are supported for signing.',
+        });
+        return;
+      }
       setFile(selectedFile);
-      setIsSigned(false);
+      setSignedContent(null);
       setSignerName('');
     }
   };
 
-  const handleSign = () => {
+  const handleSign = async () => {
     if (!file || !signerName.trim()) {
       toast({
         variant: 'destructive',
         title: 'Missing Information',
-        description: 'Please upload a document and enter the signer\'s name.',
+        description: "Please upload a .txt document and enter the signer's name.",
       });
       return;
     }
 
-    // In a real application, this would involve a call to an e-signature service API.
-    // Here, we'll just simulate the signing process.
-    setIsSigned(true);
-    toast({
-      title: 'Document Signed',
-      description: `${file.name} has been successfully signed by ${signerName}.`,
-    });
+    setIsLoading(true);
+
+    try {
+      const documentContent = await file.text();
+      const result = await signDocument({ documentContent, signerName });
+      
+      setSignedContent(result.signedDocumentContent);
+      toast({
+        title: 'Document Signed',
+        description: `${file.name} has been successfully signed by ${signerName}.`,
+      });
+    } catch (error) {
+      console.error("Signing failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Signing Failed",
+        description: "Something went wrong. Please try again."
+      })
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
+  const handleDownload = () => {
+    if (!signedContent || !file) return;
+
+    const blob = new Blob([signedContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const originalName = file.name.replace(/\.txt$/, '');
+    link.download = `${originalName}-signed.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  
+  const resetState = () => {
+    setFile(null);
+    setSignedContent(null);
+    setSignerName('');
+    setIsLoading(false);
+  }
 
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader>
         <CardTitle>E-Signature</CardTitle>
         <CardDescription>
-          Sign your documents electronically. This is a simulation and not legally binding.
+          Sign your text documents electronically. The AI will append a signature block.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="document">Document to Sign</Label>
-          <div className="relative">
-            <Input
-              id="document"
-              type="file"
-              onChange={handleFileChange}
-              accept=".pdf,.doc,.docx,.txt"
-              className="pl-10"
-              disabled={isSigned}
-            />
-            <FileUp className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          </div>
-          {file && (
-            <p className="text-sm text-muted-foreground">
-              Selected: {file.name}
-            </p>
-          )}
-        </div>
+        {!signedContent ? (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="document">Document to Sign (.txt only)</Label>
+              <div className="relative">
+                <Input
+                  id="document"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".txt"
+                  className="pl-10"
+                  disabled={isLoading}
+                />
+                <FileUp className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              </div>
+              {file && (
+                <p className="text-sm text-muted-foreground">
+                  Selected: {file.name}
+                </p>
+              )}
+            </div>
 
-        {file && !isSigned && (
-          <div className="space-y-2">
-            <Label htmlFor="signerName">Signer Full Name</Label>
-            <Input
-              id="signerName"
-              type="text"
-              value={signerName}
-              onChange={(e) => setSignerName(e.target.value)}
-              placeholder="Enter your full name"
-            />
-          </div>
+            {file && (
+              <div className="space-y-2">
+                <Label htmlFor="signerName">Signer Full Name</Label>
+                <Input
+                  id="signerName"
+                  type="text"
+                  value={signerName}
+                  onChange={(e) => setSignerName(e.target.value)}
+                  placeholder="Enter your full name"
+                  disabled={isLoading}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          file && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-green-50 border border-green-200 text-center">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold text-green-800">Document Signed!</h3>
+                <p className="text-sm text-green-700 mt-1">
+                  {file.name} was signed by <strong>{signerName}</strong>.
+                </p>
+              </div>
+               <div className="space-y-2">
+                  <Label>Signed Document Preview</Label>
+                  <pre className="p-4 rounded-md bg-muted text-sm h-64 overflow-auto whitespace-pre-wrap font-mono">
+                    {signedContent}
+                  </pre>
+               </div>
+            </div>
+          )
         )}
 
-        {isSigned && file && (
-          <div className="p-4 rounded-lg bg-green-50 border border-green-200 text-center">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-green-800">Document Signed!</h3>
-            <p className="text-sm text-green-700 mt-1">
-              {file.name} was signed by <strong>{signerName}</strong>.
-            </p>
-          </div>
-        )}
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
-        {file && !isSigned && (
-          <Button onClick={handleSign} disabled={!signerName.trim()}>
-            <Signature className="mr-2 h-4 w-4" />
-            Sign Document
+        {!signedContent ? (
+           <Button onClick={handleSign} disabled={!file || !signerName.trim() || isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing...
+              </>
+            ) : (
+              <>
+                <Signature className="mr-2 h-4 w-4" />
+                Sign Document
+              </>
+            )}
           </Button>
-        )}
-         {isSigned && (
-          <Button onClick={() => {
-            setFile(null);
-            setIsSigned(false);
-            setSignerName('');
-          }}>
-            Sign Another Document
-          </Button>
+        ) : (
+          <>
+            <Button variant="outline" onClick={resetState}>Sign Another Document</Button>
+            <Button onClick={handleDownload}>
+              <Download className="mr-2 h-4 w-4" />
+              Download Signed File
+            </Button>
+          </>
         )}
       </CardFooter>
     </Card>
