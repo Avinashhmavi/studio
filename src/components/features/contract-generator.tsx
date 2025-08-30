@@ -9,6 +9,7 @@ import { Copy, Loader2, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { generateContract, type GenerateContractOutput } from '@/ai/flows/generate-contract';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function ContractGenerator() {
   const [contractType, setContractType] = useState('nda');
@@ -137,12 +138,14 @@ export function ContractGenerator() {
                         </div>
                     )}
                     {result && (
-                        <Textarea
-                            readOnly
-                            value={result.contractText}
-                            className="h-[600px] font-mono text-xs"
+                       <ScrollArea className="h-[600px] w-full rounded-md border p-4">
+                         <div
+                            className="whitespace-pre-wrap font-mono text-xs"
                             aria-label="Generated Contract"
-                        />
+                         >
+                            {result.contractText}
+                         </div>
+                       </ScrollArea>
                     )}
                 </CardContent>
             </Card>

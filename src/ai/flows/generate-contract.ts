@@ -17,7 +17,7 @@ const GenerateContractInputSchema = z.object({
 export type GenerateContractInput = z.infer<typeof GenerateContractInputSchema>;
 
 const GenerateContractOutputSchema = z.object({
-  contractText: z.string().describe('The full text of the generated legal contract.'),
+  contractText: z.string().describe('The full text of the generated legal contract, formatted with proper line breaks and spacing.'),
 });
 export type GenerateContractOutput = z.infer<typeof GenerateContractOutputSchema>;
 
@@ -34,6 +34,8 @@ const prompt = ai.definePrompt({
 Your task is to generate a complete, professionally formatted legal contract based on the user's specified contract type and detailed requirements. The contract must be comprehensive, well-structured, and ready for use.
 
 Follow these formatting guidelines strictly:
+- The entire output must be a single string.
+- Use double line breaks (\\n\\n) to separate paragraphs and sections.
 - Start with a clear, centered title for the agreement (e.g., "NON-DISCLOSURE AGREEMENT").
 - Use numbered sections for main clauses (e.g., "1. DEFINITION OF CONFIDENTIAL INFORMATION", "2. OBLIGATIONS OF THE RECEIVING PARTY").
 - Use bold, uppercase headings for each section.
