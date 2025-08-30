@@ -25,12 +25,9 @@ const GenerateWorkflowOutputSchema = z.object({
             content: z.string().describe('The detailed content of the workflow step.'),
         })
     ).describe('A list of steps for the legal workflow.'),
-    youtubeLinks: z.array(
-        z.object({
-            title: z.string().describe('The title of the YouTube video.'),
-            url: z.string().url().describe('The URL of the YouTube video.'),
-        })
-    ).optional().describe('A list of relevant YouTube videos explaining the process.'),
+    suggestedYoutubeSearches: z.array(
+        z.string().describe('A relevant and specific search query for finding helpful videos on YouTube.')
+    ).optional().describe('A list of suggested YouTube search queries to help the user find relevant videos.'),
 });
 export type GenerateWorkflowOutput = z.infer<typeof GenerateWorkflowOutputSchema>;
 
@@ -48,9 +45,7 @@ Your task is to generate a clear, comprehensive, and easy-to-follow workflow for
 
 Start by creating a title for the workflow. Then, provide a series of steps. Each step must have a clear title and detailed content explaining what to do.
 
-Finally, search for and include up to 3 relevant, high-quality YouTube videos that provide a good visual or detailed explanation of the process.
-
-**CRITICAL INSTRUCTION:** You MUST ensure the video URLs you provide are valid, public, and currently available. Do not under any circumstances provide links to videos that are private, have been deleted, or are region-locked. Double-check that each URL leads to a playable video before including it in the output. Provide the title and the full, valid URL for each video.
+Finally, provide a list of up to 3 helpful and specific search queries that the user can copy and paste into YouTube to find relevant, high-quality videos about the process. Frame these as search terms, not as video titles or URLs. For example: "how to file a small claims case in [Jurisdiction]".
 
 Jurisdiction: {{{jurisdiction}}}
 Legal Topic: {{{topic}}}

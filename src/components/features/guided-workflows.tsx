@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, FileQuestion, Loader2, Youtube } from 'lucide-react';
+import { CheckCircle, FileQuestion, Loader2, Youtube, Search } from 'lucide-react';
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
 import {
   generateWorkflow,
@@ -69,6 +69,10 @@ export function GuidedWorkflows() {
       setIsLoading(false);
     }
   };
+  
+  const createYoutubeSearchLink = (query: string) => {
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  }
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
@@ -178,20 +182,25 @@ export function GuidedWorkflows() {
                   ))}
                 </Accordion>
                 
-                {result.youtubeLinks && result.youtubeLinks.length > 0 && (
+                {result.suggestedYoutubeSearches && result.suggestedYoutubeSearches.length > 0 && (
                     <div className='pt-4'>
                         <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                            <Youtube className="h-6 w-6 text-red-600" />
-                           Helpful Videos
+                           Helpful Video Searches
                         </h3>
                         <div className="space-y-3">
-                            {result.youtubeLinks.map((link, index) => (
+                            {result.suggestedYoutubeSearches.map((query, index) => (
                                 <Card key={index} className="hover:bg-muted/50 transition-colors">
-                                    <CardContent className="p-4">
-                                        <Link href={link.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
-                                            {link.title}
-                                        </Link>
-                                        <p className="text-xs text-muted-foreground mt-1 truncate">{link.url}</p>
+                                    <CardContent className="p-0">
+                                      <Link 
+                                        href={createYoutubeSearchLink(query)} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="flex items-center gap-3 p-4"
+                                      >
+                                        <Search className="h-5 w-5 text-muted-foreground" />
+                                        <p className="font-semibold text-primary hover:underline flex-1">{query}</p>
+                                      </Link>
                                     </CardContent>
                                 </Card>
                             ))}
