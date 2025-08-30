@@ -21,10 +21,20 @@ import { fileToDataUri } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { MultiSelect } from '@/components/ui/multi-select';
+
+const PREDEFINED_REGULATIONS = [
+  { value: 'GDPR', label: 'GDPR' },
+  { value: 'HIPAA', label: 'HIPAA' },
+  { value: 'CCPA', label: 'CCPA' },
+  { value: 'SOX', label: 'Sarbanes-Oxley (SOX)'},
+  { value: 'FERPA', label: 'FERPA'},
+];
+
 
 export function DocumentAnalysis() {
   const [file, setFile] = useState<File | null>(null);
-  const [regulations, setRegulations] = useState('');
+  const [regulations, setRegulations] = useState<string[]>([]);
   const [analysis, setAnalysis] = useState<AnalyzeLegalDocumentOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -53,8 +63,7 @@ export function DocumentAnalysis() {
 
     try {
       const documentDataUri = await fileToDataUri(file);
-      const regulationsList = regulations.split(',').map(r => r.trim()).filter(r => r);
-      const result = await analyzeLegalDocument({ documentDataUri, regulations: regulationsList });
+      const result = await analyzeLegalDocument({ documentDataUri, regulations: regulations });
       setAnalysis(result);
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -111,15 +120,16 @@ export function DocumentAnalysis() {
 
                <div className="space-y-2">
                 <Label htmlFor="regulations">Compliance Check (optional)</Label>
-                <Input
-                    id="regulations"
-                    placeholder="e.g., GDPR, HIPAA, CCPA"
-                    value={regulations}
-                    onChange={(e) => setRegulations(e.target.value)}
-                    disabled={isLoading}
+                <MultiSelect
+                  options={PREDEFINED_REGULATIONS}
+                  selected={regulations}
+                  onChange={setRegulations}
+                  placeholder="Select or type regulations..."
+                  disabled={isLoading}
+                  creatable
                 />
                 <p className="text-xs text-muted-foreground">
-                    Enter comma-separated regulations.
+                    Select from the list or type to add a custom regulation.
                 </p>
               </div>
 
