@@ -11,3 +11,4 @@ import '@/ai/flows/search-case-law.ts';
 import '@/ai/flows/analyze-precedents.ts';
 import '@/ai/flows/generate-contract.ts';
 import '@/ai/flows/due-diligence.ts';
+import '@/ai/flows/generate-workflow.ts';

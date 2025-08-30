@@ -1,5 +1,7 @@
+
 'use client';
 
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -13,76 +15,156 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, FileQuestion, Loader2 } from 'lucide-react';
+import { useJurisdiction } from '@/contexts/jurisdiction-context';
+import {
+  generateWorkflow,
+  type GenerateWorkflowOutput,
+} from '@/ai/flows/generate-workflow';
+import { useToast } from '@/hooks/use-toast';
 
-const smallClaimsSteps = [
+const workflowTopics = [
   {
-    title: 'Step 1: Determine If Your Case Qualifies',
-    content:
-      "Check your local court's monetary limits for small claims (e.g., up to $10,000 in California). Your claim must be for money; you can't sue to make someone do something. Common cases include security deposit disputes, property damage, or unpaid debts.",
+    id: 'small-claims',
+    title: 'File a Small Claims Case',
   },
   {
-    title: 'Step 2: Identify the Correct Defendant and Court',
-    content:
-      "You must sue the right person or business. Use their full legal name. The case should be filed in the court of the county where the defendant lives or where the incident happened. Check the court's website for specific rules.",
+    id: 'draft-will',
+    title: 'Draft a Will',
   },
   {
-    title: 'Step 3: Fill Out the "Plaintiff\'s Claim" Form',
-    content:
-      'Obtain the official form (e.g., Form SC-100 in California) from the court\'s website or clerk\'s office. Clearly state why you are suing and how much money you are demanding. Be concise and factual.',
-  },
-  {
-    title: 'Step 4: File Your Claim and Pay the Fee',
-    content:
-      'File the completed form with the court clerk. You will need to pay a filing fee, which varies by jurisdiction. If you cannot afford the fee, you can apply for a fee waiver.',
-  },
-  {
-    title: 'Step 5: Serve the Defendant',
-    content:
-      'You must formally notify the defendant that they are being sued. This is called "service of process." You cannot do this yourself. It must be done by a sheriff, a professional process server, or another adult who is not a party to the case. Proof of service must be filed with the court.',
-  },
-  {
-    title: 'Step 6: Prepare for Your Court Hearing',
-    content:
-      'Gather all your evidence, such as contracts, receipts, photos, and emails. Organize your thoughts and be prepared to explain your case to the judge clearly. You can also bring witnesses.',
-  },
-  {
-    title: 'Step 7: Attend the Court Hearing',
-    content:
-      'Arrive on time and dress appropriately. The judge will listen to both sides. Present your case calmly and stick to the facts. The judge may make a decision at the hearing or mail it to you later.',
+    id: 'register-business',
+    title: 'Register a Business',
   },
 ];
 
 export function GuidedWorkflows() {
+  const { jurisdiction } = useJurisdiction();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTopic, setActiveTopic] = useState<string | null>(null);
+  const [result, setResult] = useState<GenerateWorkflowOutput | null>(null);
+
+  const handleGenerateWorkflow = async (topic: string) => {
+    setIsLoading(true);
+    setResult(null);
+    setActiveTopic(topic);
+    try {
+      const response = await generateWorkflow({ topic, jurisdiction });
+      setResult(response);
+    } catch (error) {
+      console.error('Workflow generation failed', error);
+      toast({
+        variant: 'destructive',
+        title: 'Generation Failed',
+        description: 'Failed to generate the workflow. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle>Guided Legal Workflows</CardTitle>
-        <CardDescription>
-          Step-by-step guidance for common legal processes. This is not legal
-          advice.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <h3 className="text-lg font-semibold mb-4">
-          How to File a Small Claims Case
-        </h3>
-        <Accordion type="single" collapsible className="w-full space-y-2">
-          {smallClaimsSteps.map((step, index) => (
-            <AccordionItem value={`item-${index}`} key={index} className="border rounded-lg bg-card px-4">
-              <AccordionTrigger className="text-left hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-                  <span className="font-semibold">{step.title}</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-1 pb-4 pl-8 text-base">
-                {step.content}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </CardContent>
-    </Card>
+    <div className="grid gap-8 lg:grid-cols-3">
+      <div className="lg:col-span-1">
+        <Card>
+          <CardHeader>
+            <CardTitle>Guided Legal Workflows</CardTitle>
+            <CardDescription>
+              Select a topic to generate a step-by-step guide for your
+              jurisdiction.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm font-medium text-muted-foreground">
+              Select a workflow:
+            </p>
+            <div className="flex flex-col space-y-2">
+              {workflowTopics.map((topic) => (
+                <Button
+                  key={topic.id}
+                  variant={activeTopic === topic.title ? 'default' : 'outline'}
+                  onClick={() => handleGenerateWorkflow(topic.title)}
+                  disabled={isLoading}
+                >
+                  {isLoading && activeTopic === topic.title && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {topic.title}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="lg:col-span-2">
+        <Card className="min-h-[400px]">
+          <CardHeader>
+            <CardTitle>
+              {result ? result.workflowTitle : 'Workflow Steps'}
+            </CardTitle>
+            <CardDescription>
+              Follow these AI-generated steps for your legal process.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading && (
+              <div className="flex flex-col items-center justify-center space-y-4 pt-20">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <p className="text-muted-foreground">
+                  Generating workflow for {jurisdiction}...
+                </p>
+              </div>
+            )}
+            {!isLoading && !result && (
+              <div className="flex items-center justify-center pt-20 text-center">
+                <p className="text-muted-foreground">
+                  Select a workflow topic to see the steps here.
+                </p>
+              </div>
+            )}
+            {result && (
+              <div className="space-y-4">
+                <Alert variant="destructive">
+                  <FileQuestion className="h-4 w-4" />
+                  <AlertTitle>Not Legal Advice</AlertTitle>
+                  <AlertDescription>
+                    The information provided is for informational purposes only
+                    and does not constitute legal advice. Consult with a
+                    qualified professional.
+                  </AlertDescription>
+                </Alert>
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="w-full space-y-2"
+                >
+                  {result.steps.map((step, index) => (
+                    <AccordionItem
+                      value={`item-${index}`}
+                      key={index}
+                      className="border rounded-lg bg-card px-4"
+                    >
+                      <AccordionTrigger className="text-left hover:no-underline">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                          <span className="font-semibold">{step.title}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-1 pb-4 pl-8 text-base">
+                        <p className="whitespace-pre-wrap">{step.content}</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
