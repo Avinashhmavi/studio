@@ -16,12 +16,15 @@ import {
   analyzeLegalDocument,
   type AnalyzeLegalDocumentOutput,
 } from '@/ai/flows/analyze-legal-documents';
-import { Loader2, FileUp, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, FileUp, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { fileToDataUri } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export function DocumentAnalysis() {
   const [file, setFile] = useState<File | null>(null);
+  const [regulations, setRegulations] = useState('');
   const [analysis, setAnalysis] = useState<AnalyzeLegalDocumentOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -50,7 +53,8 @@ export function DocumentAnalysis() {
 
     try {
       const documentDataUri = await fileToDataUri(file);
-      const result = await analyzeLegalDocument({ documentDataUri });
+      const regulationsList = regulations.split(',').map(r => r.trim()).filter(r => r);
+      const result = await analyzeLegalDocument({ documentDataUri, regulations: regulationsList });
       setAnalysis(result);
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -64,6 +68,20 @@ export function DocumentAnalysis() {
     }
   };
 
+  const getRiskBadgeVariant = (severity: 'Low' | 'Medium' | 'High') => {
+    switch (severity) {
+      case 'Low':
+        return 'default';
+      case 'Medium':
+        return 'secondary';
+      case 'High':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <div className="lg:col-span-1">
@@ -71,8 +89,7 @@ export function DocumentAnalysis() {
           <CardHeader>
             <CardTitle>Analyze Document</CardTitle>
             <CardDescription>
-              Upload a legal document to extract key terms, identify risks, and
-              receive a summary.
+              Upload a document for risk analysis and compliance checks.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -91,6 +108,21 @@ export function DocumentAnalysis() {
                 </div>
                  {file && <p className="text-sm text-muted-foreground">Selected: {file.name}</p>}
               </div>
+
+               <div className="space-y-2">
+                <Label htmlFor="regulations">Compliance Check (optional)</Label>
+                <Input
+                    id="regulations"
+                    placeholder="e.g., GDPR, HIPAA, CCPA"
+                    value={regulations}
+                    onChange={(e) => setRegulations(e.target.value)}
+                    disabled={isLoading}
+                />
+                <p className="text-xs text-muted-foreground">
+                    Enter comma-separated regulations.
+                </p>
+              </div>
+
               <Button type="submit" className="w-full" disabled={isLoading || !file}>
                 {isLoading ? (
                   <>
@@ -128,13 +160,55 @@ export function DocumentAnalysis() {
               </div>
             )}
             {analysis && (
-              <Accordion type="multiple" defaultValue={['summary', 'key-terms', 'risks', 'attention']} className="w-full space-y-4">
+              <Accordion type="multiple" defaultValue={['summary', 'risks', 'compliance', 'key-terms']} className="w-full space-y-4">
                 <AccordionItem value="summary" className="border rounded-lg bg-card px-4">
                   <AccordionTrigger className="text-lg font-semibold hover:no-underline">Summary</AccordionTrigger>
                   <AccordionContent className="pt-2 text-base leading-relaxed">
                     {analysis.summary}
                   </AccordionContent>
                 </AccordionItem>
+
+                 <AccordionItem value="risks" className="border rounded-lg bg-card px-4">
+                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">Potential Risks</AccordionTrigger>
+                  <AccordionContent className="pt-2">
+                     <div className="space-y-4">
+                      {analysis.potentialRisks.map((riskItem, index) => (
+                        <div key={index} className="border-b pb-4 last:border-b-0">
+                           <div className="flex items-center justify-between mb-2">
+                             <div className="flex items-center gap-2">
+                                <AlertTriangle className="h-5 w-5 text-destructive" />
+                                <h4 className="font-semibold">{riskItem.risk}</h4>
+                             </div>
+                             <Badge variant={getRiskBadgeVariant(riskItem.severity)}>{riskItem.severity} Risk</Badge>
+                           </div>
+                           <p className="text-sm text-muted-foreground pl-7">{riskItem.recommendation}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                
+                {analysis.complianceAnalysis && analysis.complianceAnalysis.length > 0 && (
+                 <AccordionItem value="compliance" className="border rounded-lg bg-card px-4">
+                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">Compliance Analysis</AccordionTrigger>
+                  <AccordionContent className="pt-2">
+                    <div className="space-y-4">
+                      {analysis.complianceAnalysis.map((item, index) => (
+                        <div key={index} className="border-b pb-4 last:border-b-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <ShieldCheck className={cn("h-5 w-5", item.isCompliant ? "text-green-600" : "text-destructive")} />
+                            <h4 className="font-semibold">{item.regulation}</h4>
+                            <Badge variant={item.isCompliant ? 'default' : 'destructive'}>
+                              {item.isCompliant ? 'Compliant' : 'Not Compliant'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground pl-7">{item.reasoning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                )}
 
                 <AccordionItem value="key-terms" className="border rounded-lg bg-card px-4">
                   <AccordionTrigger className="text-lg font-semibold hover:no-underline">Key Terms</AccordionTrigger>
@@ -150,33 +224,6 @@ export function DocumentAnalysis() {
                   </AccordionContent>
                 </AccordionItem>
 
-                 <AccordionItem value="risks" className="border rounded-lg bg-card px-4">
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">Potential Risks</AccordionTrigger>
-                  <AccordionContent className="pt-2">
-                    <ul className="list-disc space-y-2 pl-5">
-                      {analysis.potentialRisks.map((risk, index) => (
-                        <li key={index} className="flex items-start">
-                           <AlertTriangle className="mr-2 mt-1 h-4 w-4 shrink-0 text-yellow-500" />
-                           <span>{risk}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="attention" className="border rounded-lg bg-card px-4">
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">Areas Requiring Attention</AccordionTrigger>
-                  <AccordionContent className="pt-2">
-                    <ul className="list-disc space-y-2 pl-5">
-                      {analysis.areasRequiringAttention.map((area, index) => (
-                         <li key={index} className="flex items-start">
-                            <AlertTriangle className="mr-2 mt-1 h-4 w-4 shrink-0 text-red-500" />
-                            <span>{area}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
               </Accordion>
             )}
           </CardContent>
