@@ -8,11 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, BookCopy, Landmark } from 'lucide-react';
+import { Loader2, BookCopy, Landmark, ShieldQuestion, Gavel, FileQuestion } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
 import { JURISDICTIONS } from '@/lib/jurisdictions';
 import { analyzePrecedents, type AnalyzePrecedentsOutput } from '@/ai/flows/analyze-precedents';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function PrecedentAnalysis() {
   const [caseDetails, setCaseDetails] = useState('');
@@ -119,7 +120,15 @@ export function PrecedentAnalysis() {
               </div>
             )}
             {result && (
-               <Accordion type="multiple" defaultValue={['summary', 'precedents']} className="w-full space-y-4">
+              <div className="space-y-4">
+                 <Alert variant="destructive">
+                    <FileQuestion className="h-4 w-4" />
+                    <AlertTitle>Not Legal Advice</AlertTitle>
+                    <AlertDescription>
+                        The information provided is for informational purposes only and does not constitute legal advice. You should consult with a qualified legal professional for advice regarding your individual situation.
+                    </AlertDescription>
+                </Alert>
+               <Accordion type="multiple" defaultValue={['summary', 'precedents', 'strategy']} className="w-full space-y-4">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl">Analysis Summary</CardTitle>
@@ -151,7 +160,46 @@ export function PrecedentAnalysis() {
                         ) : <p className="text-muted-foreground">No relevant precedents found.</p>}
                     </AccordionContent>
                   </AccordionItem>
+                  
+                  <AccordionItem value="strategy" className="border rounded-lg bg-card px-4">
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                        <div className="flex items-center gap-2">
+                            <Gavel className="h-5 w-5" />
+                            Case Strategy & Solutions
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-2 text-base">
+                       <p className="whitespace-pre-wrap">{result.caseStrategy}</p>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="prevention" className="border rounded-lg bg-card px-4">
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                        <div className="flex items-center gap-2">
+                            <ShieldQuestion className="h-5 w-5" />
+                            Arrest Prevention & Rights
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-2 text-base">
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="font-semibold mb-2">Arrest Prevention Measures</h4>
+                                <ul className="list-disc space-y-2 pl-5">
+                                    {result.arrestPreventionMeasures.map((measure, i) => <li key={i}>{measure}</li>)}
+                                </ul>
+                            </div>
+                            <div className="border-t pt-4">
+                                <h4 className="font-semibold mb-2">Your Rights During an Arrest</h4>
+                                <ul className="list-disc space-y-2 pl-5">
+                                    {result.rightsDuringArrest.map((right, i) => <li key={i}>{right}</li>)}
+                                </ul>
+                            </div>
+                        </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
               </Accordion>
+              </div>
             )}
           </CardContent>
         </Card>
