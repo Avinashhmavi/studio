@@ -20,6 +20,7 @@ import {
   Settings,
   LifeBuoy,
   GitCompareArrows,
+  Signature,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
@@ -30,6 +31,7 @@ const menuItems = [
   { href: '/legal-qa', label: 'Legal Q&A', icon: MessageSquare },
   { href: '/negotiation-support', label: 'Negotiation', icon: Gavel },
   { href: '/document-storage', label: 'My Documents', icon: Folder },
+  { href: '/e-signature', label: 'E-Signature', icon: Signature },
 ];
 
 export function AppSidebar() {

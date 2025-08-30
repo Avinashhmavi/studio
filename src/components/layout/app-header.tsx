@@ -36,6 +36,8 @@ const getPageTitle = (pathname: string) => {
       return 'My Documents';
     case '/document-comparison':
       return 'Document Comparison';
+    case '/e-signature':
+      return 'E-Signature';
     default:
       return 'Dashboard';
   }
