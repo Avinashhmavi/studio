@@ -13,7 +13,7 @@ export function Logo({ className }: { className?: string }) {
         <Scale className="h-5 w-5" />
       </div>
       <span className="truncate group-data-[collapsible=icon]:hidden">
-        LegAI
+        Legal Ai
       </span>
     </div>
   );

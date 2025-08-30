@@ -9,7 +9,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { JurisdictionProvider } from '@/contexts/jurisdiction-context';
 
 export const metadata: Metadata = {
-  title: 'LegAI',
+  title: 'Legal Ai',
   description: 'Your AI-powered Legal Assistant',
 };
 

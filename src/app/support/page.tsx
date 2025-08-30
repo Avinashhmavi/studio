@@ -9,7 +9,7 @@ export default function SupportPage() {
       <CardHeader>
         <CardTitle>Support</CardTitle>
         <CardDescription>
-          Get help with LegAI or provide feedback.
+          Get help with Legal Ai or provide feedback.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
