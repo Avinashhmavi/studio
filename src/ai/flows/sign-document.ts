@@ -12,7 +12,11 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SignDocumentInputSchema = z.object({
-  documentContent: z.string().describe('The text content of the document to be signed.'),
+  documentDataUri: z
+    .string()
+    .describe(
+      "A document (PDF, DOCX, image, or TXT) as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
   signerName: z.string().describe("The full name of the person signing the document."),
 });
 export type SignDocumentInput = z.infer<typeof SignDocumentInputSchema>;
@@ -32,16 +36,16 @@ const prompt = ai.definePrompt({
   output: {schema: SignDocumentOutputSchema},
   prompt: `You are an AI assistant. A user wants to electronically sign a document.
   
-Take the following document content and append a standard electronic signature block at the end. The signature block should include the signer's name and the current date. The format should be clear and professional.
+Your task is to first extract all the text content from the provided document. The document can be a PDF, DOCX, image, or plain text file. After extracting the text, append a standard electronic signature block at the end. The signature block should include the signer's name and the current date. The format should be clear and professional.
 
-Document Content:
+Document:
 ---
-{{{documentContent}}}
+{{media url=documentDataUri}}
 ---
 
 Signer's Name: {{{signerName}}}
 
-Return the entire document content with the signature block added as the 'signedDocumentContent' field.
+Return the entire extracted document content with the signature block added as the 'signedDocumentContent' field.
 `,
 });
 

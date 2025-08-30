@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { FileUp, Signature, CheckCircle, Loader2, Download } from 'lucide-react';
 import { signDocument } from '@/ai/flows/sign-document';
+import { fileToDataUri } from '@/lib/utils';
 
 export function ESignature() {
   const [file, setFile] = useState<File | null>(null);
@@ -26,14 +27,6 @@ export function ESignature() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'text/plain') {
-        toast({
-          variant: 'destructive',
-          title: 'Unsupported File Type',
-          description: 'Currently, only .txt files are supported for signing.',
-        });
-        return;
-      }
       setFile(selectedFile);
       setSignedContent(null);
       setSignerName('');
@@ -45,7 +38,7 @@ export function ESignature() {
       toast({
         variant: 'destructive',
         title: 'Missing Information',
-        description: "Please upload a .txt document and enter the signer's name.",
+        description: "Please upload a document and enter the signer's name.",
       });
       return;
     }
@@ -53,8 +46,8 @@ export function ESignature() {
     setIsLoading(true);
 
     try {
-      const documentContent = await file.text();
-      const result = await signDocument({ documentContent, signerName });
+      const documentDataUri = await fileToDataUri(file);
+      const result = await signDocument({ documentDataUri, signerName });
       
       setSignedContent(result.signedDocumentContent);
       toast({
@@ -80,7 +73,7 @@ export function ESignature() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    const originalName = file.name.replace(/\.txt$/, '');
+    const originalName = file.name.replace(/\.[^/.]+$/, '');
     link.download = `${originalName}-signed.txt`;
     document.body.appendChild(link);
     link.click();
@@ -100,20 +93,20 @@ export function ESignature() {
       <CardHeader>
         <CardTitle>E-Signature</CardTitle>
         <CardDescription>
-          Sign your text documents electronically. The AI will append a signature block.
+          Sign your documents electronically. The AI will extract the text and append a signature block.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {!signedContent ? (
           <>
             <div className="space-y-2">
-              <Label htmlFor="document">Document to Sign (.txt only)</Label>
+              <Label htmlFor="document">Document to Sign (.pdf, .docx, .txt, images)</Label>
               <div className="relative">
                 <Input
                   id="document"
                   type="file"
                   onChange={handleFileChange}
-                  accept=".txt"
+                  accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp"
                   className="pl-10"
                   disabled={isLoading}
                 />
@@ -151,7 +144,7 @@ export function ESignature() {
                 </p>
               </div>
                <div className="space-y-2">
-                  <Label>Signed Document Preview</Label>
+                  <Label>Signed Document Preview (.txt)</Label>
                   <pre className="p-4 rounded-md bg-muted text-sm h-64 overflow-auto whitespace-pre-wrap font-mono">
                     {signedContent}
                   </pre>
