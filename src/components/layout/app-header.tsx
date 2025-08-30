@@ -39,6 +39,8 @@ const getPageTitle = (pathname: string) => {
       return 'Legal Q&A';
     case '/negotiation-support':
       return 'AI Negotiation Support';
+    case '/guided-workflows':
+      return 'Guided Workflows';
     case '/document-storage':
       return 'My Documents';
     case '/document-comparison':

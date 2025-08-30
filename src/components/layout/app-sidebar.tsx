@@ -23,6 +23,7 @@ import {
   Signature,
   Search,
   BookCopy,
+  Workflow,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
@@ -34,6 +35,7 @@ const menuItems = [
   { href: '/contract-generation', label: 'Contract Templates', icon: FileText },
   { href: '/legal-qa', label: 'Legal Q&A', icon: MessageSquare },
   { href: '/negotiation-support', label: 'Negotiation', icon: Gavel },
+  { href: '/guided-workflows', label: 'Guided Workflows', icon: Workflow },
   { href: '/document-storage', label: 'My Documents', icon: Folder },
   { href: '/e-signature', label: 'E-Signature', icon: Signature },
 ];
