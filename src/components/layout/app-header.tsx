@@ -41,8 +41,8 @@ const getPageTitle = (pathname: string) => {
       return 'AI Negotiation Support';
     case '/guided-workflows':
       return 'Guided Workflows';
-    case '/document-storage':
-      return 'My Documents';
+    case '/matter-management':
+      return 'Matter Management';
     case '/document-comparison':
       return 'Document Comparison';
     case '/e-signature':
