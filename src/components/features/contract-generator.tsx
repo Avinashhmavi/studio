@@ -5,89 +5,148 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, Loader2, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-const templates = {
-  nda: `NON-DISCLOSURE AGREEMENT
-
-This Non-Disclosure Agreement (the "Agreement") is entered into as of [Date] by and between:
-
-[Disclosing Party Name], with a principal place of business at [Address] ("Disclosing Party"), and
-
-[Receiving Party Name], with a principal place of business at [Address] ("Receiving Party").
-
-1.  Purpose. The parties wish to discuss certain business opportunities...
-2.  Confidential Information. "Confidential Information" means...
-3.  Obligations. The Receiving Party agrees...
-...
-  `,
-  lease: `RESIDENTIAL LEASE AGREEMENT
-
-This Lease Agreement (the "Lease") is made and entered into on [Date], by and between:
-
-[Landlord Name] ("Landlord"), and
-
-[Tenant Name(s)] ("Tenant").
-
-1.  Property. Landlord leases to Tenant the premises at [Property Address]...
-2.  Term. The term of this Lease shall be for [Number] months/years, beginning on [Start Date]...
-3.  Rent. Tenant shall pay Landlord a monthly rent of $[Amount]...
-...
-  `,
-};
-
-type TemplateKey = keyof typeof templates;
+import { Label } from '@/components/ui/label';
+import { generateContract, type GenerateContractOutput } from '@/ai/flows/generate-contract';
 
 export function ContractGenerator() {
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('nda');
+  const [contractType, setContractType] = useState('nda');
+  const [details, setDetails] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<GenerateContractOutput | null>(null);
   const { toast } = useToast();
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!details.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Details',
+        description: 'Please provide the details for your contract.',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    setResult(null);
+
+    try {
+      const response = await generateContract({ contractType, details });
+      setResult(response);
+    } catch (error) {
+      console.error('Contract generation failed:', error);
+       toast({
+        variant: 'destructive',
+        title: 'Generation Failed',
+        description: 'Something went wrong. Please try again.',
+      });
+    } finally {
+        setIsLoading(false);
+    }
+  }
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(templates[selectedTemplate]);
+    if (!result?.contractText) return;
+    navigator.clipboard.writeText(result.contractText);
     toast({
       title: 'Copied to Clipboard',
-      description: 'The contract template has been copied.',
+      description: 'The generated contract has been copied.',
     });
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Generate a Contract Template</CardTitle>
-        <CardDescription>
-          Select a document type to generate a starter template. You can then
-          customize it to fit your needs.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Select
-            value={selectedTemplate}
-            onValueChange={(value) => setSelectedTemplate(value as TemplateKey)}
-          >
-            <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder="Select a document type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="nda">Non-Disclosure Agreement (NDA)</SelectItem>
-              <SelectItem value="lease">Residential Lease Agreement</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" onClick={handleCopy}>
-            <Copy className="mr-2 h-4 w-4" />
-            Copy Template
-          </Button>
+    <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+            <Card>
+                <CardHeader>
+                    <CardTitle>AI Contract Generator</CardTitle>
+                    <CardDescription>
+                    Describe your contract needs and let AI draft it for you.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="contract-type">Contract Type</Label>
+                            <Select
+                                value={contractType}
+                                onValueChange={(value) => setContractType(value)}
+                                disabled={isLoading}
+                            >
+                                <SelectTrigger id="contract-type">
+                                <SelectValue placeholder="Select a document type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="nda">Non-Disclosure Agreement (NDA)</SelectItem>
+                                    <SelectItem value="lease">Residential Lease Agreement</SelectItem>
+                                    <SelectItem value="service">Service Agreement</SelectItem>
+                                    <SelectItem value="employment">Employment Agreement</SelectItem>
+                                    <SelectItem value="custom">Other (Specify in details)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="details">Contract Details</Label>
+                            <Textarea
+                                id="details"
+                                value={details}
+                                onChange={(e) => setDetails(e.target.value)}
+                                placeholder="e.g., 'An NDA between two companies, Acme Inc. and Beta Corp, for the purpose of discussing a potential partnership. The confidential information is related to a new software project.'"
+                                rows={8}
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <Button type="submit" className="w-full" disabled={isLoading || !details.trim()}>
+                            {isLoading ? (
+                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
+                            ) : (
+                            <><Wand2 className="mr-2 h-4 w-4" /> Generate Contract</>
+                            )}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
-        <div>
-          <Textarea
-            readOnly
-            value={templates[selectedTemplate]}
-            className="h-[500px] font-mono text-xs"
-            aria-label="Contract Template"
-          />
+        <div className="lg:col-span-2">
+             <Card className="min-h-[400px]">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Generated Contract</CardTitle>
+                        <CardDescription>
+                            Review the AI-generated contract below.
+                        </CardDescription>
+                    </div>
+                     {result && (
+                        <Button variant="outline" onClick={handleCopy}>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Copy Contract
+                        </Button>
+                    )}
+                </CardHeader>
+                <CardContent>
+                     {isLoading && (
+                        <div className="flex flex-col items-center justify-center space-y-4 pt-20">
+                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                            <p className="text-muted-foreground">AI is drafting your contract...</p>
+                        </div>
+                    )}
+                    {!isLoading && !result && (
+                        <div className="flex items-center justify-center pt-20 text-center">
+                            <p className="text-muted-foreground">Your generated contract will appear here.</p>
+                        </div>
+                    )}
+                    {result && (
+                        <Textarea
+                            readOnly
+                            value={result.contractText}
+                            className="h-[600px] font-mono text-xs"
+                            aria-label="Generated Contract"
+                        />
+                    )}
+                </CardContent>
+            </Card>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

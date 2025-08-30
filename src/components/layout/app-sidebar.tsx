@@ -32,7 +32,7 @@ const menuItems = [
   { href: '/case-law-search', label: 'Case Law Search', icon: Search },
   { href: '/precedent-analysis', label: 'Precedent Analysis', icon: BookCopy },
   { href: '/document-comparison', label: 'Compare Documents', icon: GitCompareArrows },
-  { href: '/contract-generation', label: 'Contract Templates', icon: FileText },
+  { href: '/contract-generation', label: 'Contract Generator', icon: FileText },
   { href: '/legal-qa', label: 'Legal Q&A', icon: MessageSquare },
   { href: '/negotiation-support', label: 'Negotiation', icon: Gavel },
   { href: '/guided-workflows', label: 'Guided Workflows', icon: Workflow },
