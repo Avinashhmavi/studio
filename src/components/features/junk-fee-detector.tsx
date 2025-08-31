@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FileUp, AlertTriangle, FileQuestion } from 'lucide-react';
+import { Loader2, FileUp, AlertTriangle, FileQuestion, PieChart } from 'lucide-react';
 import { detectJunkFees, type DetectJunkFeesOutput } from '@/ai/flows/detect-junk-fees';
 import { fileToDataUri } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -21,6 +21,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
 import { JURISDICTIONS } from '@/lib/jurisdictions';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Pie, Cell, ResponsiveContainer, PieChart as RechartsPieChart } from "recharts"
 
 export function JunkFeeDetector() {
   const [file, setFile] = useState<File | null>(null);
@@ -76,6 +78,22 @@ export function JunkFeeDetector() {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  }
+
+  const chartData = result ? [
+    { name: 'Base Rent', value: parseFloat(baseRent), fill: 'hsl(var(--chart-1))' },
+    { name: 'Junk Fees', value: result.identifiedFees.reduce((acc, fee) => acc + fee.amount, 0), fill: 'hsl(var(--chart-2))' }
+  ] : [];
+
+  const chartConfig = {
+      rent: {
+        label: "Base Rent",
+        color: "hsl(var(--chart-1))",
+      },
+      fees: {
+        label: "Junk Fees",
+        color: "hsl(var(--chart-2))",
+      },
   }
 
   return (
@@ -174,25 +192,52 @@ export function JunkFeeDetector() {
                   </AlertDescription>
                 </Alert>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardDescription>Advertised Base Rent</CardDescription>
-                      <CardTitle>{formatCurrency(parseFloat(baseRent))}</CardTitle>
-                    </CardHeader>
-                  </Card>
-                  <Card className="border-primary bg-primary/5">
-                    <CardHeader>
-                      <CardDescription>True Monthly Cost</CardDescription>
-                      <CardTitle>{formatCurrency(result.trueTotalMonthlyCost)}</CardTitle>
-                    </CardHeader>
-                  </Card>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardDescription>Advertised Base Rent</CardDescription>
+                            <CardTitle className="text-4xl">{formatCurrency(parseFloat(baseRent))}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-xs text-muted-foreground">per month</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="border-primary bg-primary/5">
+                        <CardHeader className="pb-2">
+                            <CardDescription>True Monthly Cost</CardDescription>
+                            <CardTitle className="text-4xl">{formatCurrency(result.trueTotalMonthlyCost)}</CardTitle>
+                        </CardHeader>
+                         <CardContent>
+                            <div className="text-xs text-muted-foreground">including all mandatory fees</div>
+                        </CardContent>
+                    </Card>
                 </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <PieChart className="h-5 w-5" />
+                            Cost Breakdown
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[250px] w-full">
+                        <ChartContainer config={chartConfig}>
+                            <RechartsPieChart>
+                                <ChartTooltip content={<ChartTooltipContent nameKey="name" formatter={(value, name) => `${name}: ${formatCurrency(value as number)}`} />} />
+                                <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={60} strokeWidth={5}>
+                                    {chartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    ))}
+                                </Pie>
+                            </RechartsPieChart>
+                        </ChartContainer>
+                    </CardContent>
+                </Card>
                 
                 <div>
                     <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-destructive" />
-                        Identified Junk Fees
+                        Identified Additional Fees
                     </h3>
                     <div className="border rounded-lg">
                         <Table>
@@ -209,7 +254,7 @@ export function JunkFeeDetector() {
                                         <p className="font-medium">{fee.feeName}</p>
                                         <p className="text-xs text-muted-foreground">{fee.description}</p>
                                     </TableCell>
-                                    <TableCell className="text-right font-medium">{formatCurrency(fee.amount)}</TableCell>
+                                    <TableCell className="text-right font-medium">{formatCurrency(fee.amount)} / month</TableCell>
                                 </TableRow>
                                 )) : (
                                 <TableRow>
