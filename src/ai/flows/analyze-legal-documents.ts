@@ -1,3 +1,4 @@
+
 // src/ai/flows/analyze-legal-documents.ts
 'use server';
 
@@ -32,6 +33,12 @@ const AnalyzeLegalDocumentOutputSchema = z.object({
         recommendation: z.string().describe('A recommendation to mitigate the risk.'),
     }))
     .describe('Potential risks identified in the document.'),
+  clauseAnalysis: z.array(z.object({
+      clauseType: z.string().describe('The type of clause identified (e.g., "Arbitration Clause", "Auto-Renewal").'),
+      explanation: z.string().describe('An explanation of what the clause is and why it matters.'),
+      riskLevel: z.enum(['Low', 'Medium', 'High']).describe('The assessed risk level of this clause.'),
+      isPresent: z.boolean().describe('Whether the clause was detected in the document.'),
+  })).describe('An analysis of specific high-risk clauses.'),
   complianceAnalysis: z.array(z.object({
       regulation: z.string().describe('The regulation that was checked.'),
       isCompliant: z.boolean().describe('Whether the document appears to be compliant.'),
@@ -57,7 +64,15 @@ Your task is to analyze a legal document and provide a comprehensive report cove
 1. A concise summary of the document.
 2. A list of key terms.
 3. A list of potential legal risks, each with a severity rating (Low, Medium, High) and a recommendation for mitigation.
-4. {{#if regulations}}A compliance analysis for the following regulations: {{{regulations}}}. For each regulation, state whether the document appears compliant and provide your reasoning.{{/if}}
+4. A detailed "Clause Analysis" for the following specific clauses:
+   - Arbitration Clause
+   - Class-Action Waiver
+   - Confession of Judgment
+   - Auto-Renewal Terms
+   - Hidden/Mandatory Fees
+   - Penalty Clauses & Obligations
+   For each of these clauses, determine if it is present in the document. If it is, provide an explanation of "why it matters" and assess its risk level (Low, Medium, High). If it is not present, mark it as not present.
+5. {{#if regulations}}A compliance analysis for the following regulations: {{{regulations}}}. For each regulation, state whether the document appears compliant and provide your reasoning.{{/if}}
 
 Analyze the following legal document:
 {{media url=documentDataUri}}
