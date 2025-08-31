@@ -18,6 +18,9 @@ import { detectJunkFees, type DetectJunkFeesOutput } from '@/ai/flows/detect-jun
 import { fileToDataUri } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useJurisdiction } from '@/contexts/jurisdiction-context';
+import { JURISDICTIONS } from '@/lib/jurisdictions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function JunkFeeDetector() {
   const [file, setFile] = useState<File | null>(null);
@@ -25,6 +28,7 @@ export function JunkFeeDetector() {
   const [result, setResult] = useState<DetectJunkFeesOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { jurisdiction, setJurisdiction } = useJurisdiction();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -56,7 +60,7 @@ export function JunkFeeDetector() {
         setIsLoading(false);
         return;
       }
-      const response = await detectJunkFees({ leaseDocumentDataUri, baseRent: rentAmount });
+      const response = await detectJunkFees({ leaseDocumentDataUri, baseRent: rentAmount, jurisdiction });
       setResult(response);
     } catch (error) {
       console.error('Junk fee detection failed:', error);
@@ -81,7 +85,7 @@ export function JunkFeeDetector() {
           <CardHeader>
             <CardTitle>Junk Fee Detector</CardTitle>
             <CardDescription>
-              Analyze your rental lease for hidden fees.
+              Analyze your rental lease for hidden fees based on your jurisdiction.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -96,6 +100,19 @@ export function JunkFeeDetector() {
                   placeholder="e.g., 2000"
                   disabled={isLoading}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="jurisdiction-junk-fee">Jurisdiction</Label>
+                 <Select value={jurisdiction} onValueChange={setJurisdiction} disabled={isLoading}>
+                    <SelectTrigger id="jurisdiction-junk-fee">
+                        <SelectValue placeholder="Select Jurisdiction" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {JURISDICTIONS.map((j) => (
+                            <SelectItem key={j.value} value={j.value}>{j.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lease">Lease Document</Label>
@@ -128,7 +145,7 @@ export function JunkFeeDetector() {
       <div className="lg:col-span-2">
         <Card className="min-h-[400px]">
           <CardHeader>
-            <CardTitle>Analysis Report</CardTitle>
+            <CardTitle>Analysis Report for {jurisdiction}</CardTitle>
             <CardDescription>
               A breakdown of the true cost of your lease.
             </CardDescription>
