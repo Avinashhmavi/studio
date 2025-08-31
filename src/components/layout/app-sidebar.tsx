@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   Briefcase,
   Calculator,
+  Receipt,
 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
@@ -43,6 +44,7 @@ const menuItems = [
   { href: '/matter-management', label: 'Matter Management', icon: Briefcase },
   { href: '/e-signature', label: 'E-Signature', icon: Signature },
   { href: '/cost-estimation', label: 'Cost Estimator', icon: Calculator },
+  { href: '/junk-fee-detector', label: 'Junk Fee Detector', icon: Receipt },
 ];
 
 export function AppSidebar() {

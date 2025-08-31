@@ -51,6 +51,8 @@ const getPageTitle = (pathname: string) => {
         return 'Due Diligence';
     case '/cost-estimation':
         return 'Cost Estimation';
+    case '/junk-fee-detector':
+        return 'Junk Fee Detector';
     case '/settings':
       return 'Settings';
     case '/support':
