@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, Scale, User, Loader2 } from 'lucide-react';
+import { Send, Scale, User, Loader2, Paperclip, X, File as FileIcon } from 'lucide-react';
 import { answerLegalQuestions } from '@/ai/flows/answer-legal-questions';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn, fileToDataUri } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useJurisdiction } from '@/contexts/jurisdiction-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,10 +25,12 @@ interface Message {
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { jurisdiction, setJurisdiction } = useJurisdiction();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -38,6 +40,20 @@ export function ChatInterface() {
         }
     }
   }, [messages]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+        setFile(selectedFile);
+    }
+  };
+
+  const removeFile = () => {
+    setFile(null);
+    if(fileInputRef.current) {
+        fileInputRef.current.value = "";
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +66,14 @@ export function ChatInterface() {
 
     try {
       const question = `In the jurisdiction of ${jurisdiction}, ${input}`;
+      const documentDataUri = file ? await fileToDataUri(file) : undefined;
       
-      const result = await answerLegalQuestions({ question });
+      console.log('Sending request:', { question, hasFile: !!file, fileName: file?.name });
+      
+      const result = await answerLegalQuestions({ question, documentDataUri });
+      
+      console.log('Received response:', result);
+      
       const aiMessage: Message = {
         id: Date.now() + 1,
         text: result.answer,
@@ -62,14 +84,17 @@ export function ChatInterface() {
       console.error('Chat error:', error);
       const userMessages = messages.filter((m) => m.id !== userMessage.id);
       setMessages(userMessages);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         variant: 'destructive',
         title: 'An error occurred',
-        description: 'Failed to get an answer. Please try again.',
+        description: `Failed to get an answer: ${errorMessage}`,
       });
 
     } finally {
       setIsLoading(false);
+      removeFile();
     }
   };
 
@@ -79,7 +104,7 @@ export function ChatInterface() {
             <div className='flex justify-between items-start'>
                 <div>
                     <CardTitle>Legal Q&A Chatbot</CardTitle>
-                    <CardDescription>Ask common legal questions and get AI-powered answers.</CardDescription>
+                    <CardDescription>Ask questions, or upload a document for context-aware answers.</CardDescription>
                 </div>
                 <div className="space-y-1.5">
                     <Label htmlFor="jurisdiction-chat">Jurisdiction</Label>
@@ -141,22 +166,54 @@ export function ChatInterface() {
                     )}
                 </div>
             </ScrollArea>
-            <form onSubmit={handleSubmit} className="relative mt-auto">
-                <Input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask a legal question..."
-                    className="pr-12"
-                    disabled={isLoading}
-                />
-                <Button
-                    type="submit"
-                    size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    disabled={isLoading || !input.trim()}
-                >
-                    <Send className="h-4 w-4" />
-                </Button>
+            <form onSubmit={handleSubmit} className="mt-auto space-y-2">
+                {file && (
+                    <div className="flex items-center gap-2 rounded-md border bg-muted/50 p-2 text-sm">
+                        <FileIcon className="h-4 w-4 shrink-0" />
+                        <span className="flex-1 truncate">{file.name}</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeFile} disabled={isLoading}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
+                <div className="relative">
+                    <Input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Ask a question about your document or a general legal topic..."
+                        className="pr-24"
+                        disabled={isLoading}
+                    />
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center">
+                        <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isLoading}
+                            className="h-8 w-8"
+                        >
+                            <Paperclip className="h-4 w-4" />
+                            <span className="sr-only">Attach file</span>
+                        </Button>
+                        <Input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.txt"
+                        />
+                        <Button
+                            type="submit"
+                            size="icon"
+                            className="h-8 w-8"
+                            disabled={isLoading || !input.trim()}
+                        >
+                            <Send className="h-4 w-4" />
+                            <span className="sr-only">Send message</span>
+                        </Button>
+                    </div>
+                </div>
             </form>
         </CardContent>
     </Card>

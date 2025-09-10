@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -16,7 +17,7 @@ import {
   analyzeLegalDocument,
   type AnalyzeLegalDocumentOutput,
 } from '@/ai/flows/analyze-legal-documents';
-import { Loader2, FileUp, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Loader2, FileUp, CheckCircle, AlertTriangle, ShieldCheck, FileWarning, BadgeCheck } from 'lucide-react';
 import { fileToDataUri } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
@@ -170,16 +171,54 @@ export function DocumentAnalysis() {
               </div>
             )}
             {analysis && (
-              <Accordion type="multiple" defaultValue={['summary', 'risks', 'compliance', 'key-terms']} className="w-full space-y-4">
+              <Accordion type="multiple" defaultValue={['summary', 'clauses', 'risks', 'compliance', 'key-terms']} className="w-full space-y-4">
                 <AccordionItem value="summary" className="border rounded-lg bg-card px-4">
                   <AccordionTrigger className="text-lg font-semibold hover:no-underline">Summary</AccordionTrigger>
                   <AccordionContent className="pt-2 text-base leading-relaxed">
                     {analysis.summary}
                   </AccordionContent>
                 </AccordionItem>
+                
+                 {analysis.clauseAnalysis && analysis.clauseAnalysis.length > 0 && (
+                 <AccordionItem value="clauses" className="border rounded-lg bg-card px-4">
+                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">Clause & Risk Detection</AccordionTrigger>
+                  <AccordionContent className="pt-2">
+                    <div className="space-y-4">
+                      {analysis.clauseAnalysis.map((item, index) => (
+                        <div key={index} className="border-b pb-4 last:border-b-0">
+                          <div className="flex items-start gap-3">
+                            <div className="mt-1">
+                                {item.isPresent ? (
+                                    <FileWarning className="h-5 w-5 text-yellow-600" />
+                                ) : (
+                                    <BadgeCheck className="h-5 w-5 text-green-600" />
+                                )}
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-3 mb-1">
+                                    <h4 className="font-semibold">{item.clauseType}</h4>
+                                    {item.isPresent ? (
+                                      <Badge variant={getRiskBadgeVariant(item.riskLevel)}>{item.riskLevel} Risk</Badge>
+                                    ) : (
+                                      <Badge variant="outline">Not Detected</Badge>
+                                    )}
+                                </div>
+                                {item.isPresent && (
+                                  <p className="text-sm text-muted-foreground">
+                                    <span className="font-semibold">Why it matters:</span> {item.explanation}
+                                  </p>
+                                )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                )}
 
                  <AccordionItem value="risks" className="border rounded-lg bg-card px-4">
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">Potential Risks</AccordionTrigger>
+                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">General Potential Risks</AccordionTrigger>
                   <AccordionContent className="pt-2">
                      <div className="space-y-4">
                       {analysis.potentialRisks.map((riskItem, index) => (

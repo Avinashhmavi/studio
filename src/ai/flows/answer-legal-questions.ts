@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview An AI agent for answering common legal questions.
+ * @fileOverview An AI agent for answering common legal questions, with optional document context.
  *
  * - answerLegalQuestions - A function that answers legal questions.
  * - AnswerLegalQuestionsInput - The input type for the answerLegalQuestions function.
@@ -13,6 +13,12 @@ import {z} from 'genkit';
 
 const AnswerLegalQuestionsInputSchema = z.object({
   question: z.string().describe('The legal question to be answered.'),
+  documentDataUri: z
+    .string()
+    .optional()
+    .describe(
+      "An optional legal document as a data URI for context. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 export type AnswerLegalQuestionsInput = z.infer<typeof AnswerLegalQuestionsInputSchema>;
 
@@ -29,9 +35,18 @@ const prompt = ai.definePrompt({
   name: 'answerLegalQuestionsPrompt',
   input: {schema: AnswerLegalQuestionsInputSchema},
   output: {schema: AnswerLegalQuestionsOutputSchema},
-  prompt: `You are a helpful legal assistant. Answer the following legal question:
+  prompt: `You are a helpful legal assistant. Answer the following legal question.
+
+{{#if documentDataUri}}
+Base your answer primarily on the content of the following document.
+Document:
+{{media url=documentDataUri}}
+---
+{{/if}}
 
 Question: {{{question}}}
+
+Please provide a comprehensive legal answer based on the jurisdiction and any provided document context. If a document is provided, analyze it thoroughly and provide specific legal insights.
 
 Answer: `,
 });

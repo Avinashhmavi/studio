@@ -38,18 +38,21 @@ Follow these formatting guidelines strictly:
 - Use double line breaks (\\n\\n) to separate paragraphs and sections.
 - Start with a clear, centered title for the agreement (e.g., "NON-DISCLOSURE AGREEMENT").
 - Use numbered sections for main clauses (e.g., "1. DEFINITION OF CONFIDENTIAL INFORMATION", "2. OBLIGATIONS OF THE RECEIVING PARTY").
-- Use bold, uppercase headings for each section.
+- Use ALL CAPS for section headings to make them stand out.
 - Use placeholders like [Name], [Address], [Date], and [Amount] for specific details that the user must fill in.
-- Do NOT use markdown like asterisks (*) for lists. Use lettered sub-clauses (e.g., a., b., c.).
+- Do NOT use markdown formatting. Use plain text with proper spacing.
+- Use lettered sub-clauses (e.g., a., b., c.) for lists within sections.
 - Ensure the language is professional and legally sound.
 - Include standard legal clauses where appropriate, such as Governing Law, Severability, and Entire Agreement.
 - End with a proper signature block for all parties.
+- Use proper indentation and spacing to make the contract easy to read.
+- Make sure each section is clearly separated and easy to follow.
 
 Contract Type: {{{contractType}}}
 Detailed Requirements:
 {{{details}}}
 
-Generate the full contract text now.
+Generate the full contract text now with proper formatting and structure.
 `,
 });
 
@@ -60,7 +63,33 @@ const generateContractFlow = ai.defineFlow(
     outputSchema: GenerateContractOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const {output} = await prompt(input);
+        return output!;
+      } catch (error: any) {
+        lastError = error;
+        
+        // Check if it's a 503 error (service unavailable)
+        if (error?.status === 503 || error?.message?.includes('503') || error?.message?.includes('overloaded')) {
+          if (attempt < maxRetries) {
+            // Wait with exponential backoff: 2s, 4s, 8s
+            const delay = Math.pow(2, attempt) * 1000;
+            console.log(`Attempt ${attempt} failed with 503 error. Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+        
+        // For non-503 errors or final attempt, throw immediately
+        throw error;
+      }
+    }
+    
+    // If we get here, all retries failed
+    throw lastError || new Error('Failed to generate contract after multiple attempts');
   }
 );

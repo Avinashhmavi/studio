@@ -128,7 +128,7 @@ export function PrecedentAnalysis() {
                         The information provided is for informational purposes only and does not constitute legal advice. You should consult with a qualified legal professional for advice regarding your individual situation.
                     </AlertDescription>
                 </Alert>
-               <Accordion type="multiple" defaultValue={['summary', 'precedents', 'strategy']} className="w-full space-y-4">
+               <Accordion type="multiple" defaultValue={['summary', 'precedents', 'strategy', 'prevention']} className="w-full space-y-4">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl">Analysis Summary</CardTitle>

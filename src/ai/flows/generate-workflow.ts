@@ -59,7 +59,33 @@ const generateWorkflowFlow = ai.defineFlow(
     outputSchema: GenerateWorkflowOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const {output} = await prompt(input);
+        return output!;
+      } catch (error: any) {
+        lastError = error;
+        
+        // Check if it's a 503 error (service unavailable)
+        if (error?.status === 503 || error?.message?.includes('503') || error?.message?.includes('overloaded')) {
+          if (attempt < maxRetries) {
+            // Wait with exponential backoff: 2s, 4s, 8s
+            const delay = Math.pow(2, attempt) * 1000;
+            console.log(`Attempt ${attempt} failed with 503 error. Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+        
+        // For non-503 errors or final attempt, throw immediately
+        throw error;
+      }
+    }
+    
+    // If we get here, all retries failed
+    throw lastError || new Error('Failed to generate workflow after multiple attempts');
   }
 );

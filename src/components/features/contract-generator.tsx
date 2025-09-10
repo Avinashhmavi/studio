@@ -138,10 +138,14 @@ export function ContractGenerator() {
                         </div>
                     )}
                     {result && (
-                       <ScrollArea className="h-[600px] w-full rounded-md border p-4">
+                       <ScrollArea className="h-[600px] w-full rounded-md border p-6">
                          <div
-                            className="whitespace-pre-wrap font-mono text-xs"
+                            className="whitespace-pre-wrap text-sm leading-relaxed font-serif"
                             aria-label="Generated Contract"
+                            style={{ 
+                              fontFamily: 'Georgia, "Times New Roman", serif',
+                              lineHeight: '1.8'
+                            }}
                          >
                             {result.contractText}
                          </div>

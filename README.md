@@ -289,5 +289,4 @@ firebase deploy
 ---
 
 **Built with ❤️ for the legal community**
-
 *LegalAI is designed to augment legal professionals' capabilities, not replace them. Always consult with qualified legal counsel for important legal decisions.*
