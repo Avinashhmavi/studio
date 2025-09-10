@@ -110,8 +110,8 @@ LegalAI is a comprehensive AI-powered legal assistant platform that leverages ad
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd legal-ai-studio
+   git clone https://github.com/Avinashhmavi/studio.git
+   cd studio
    ```
 
 2. **Install dependencies**
