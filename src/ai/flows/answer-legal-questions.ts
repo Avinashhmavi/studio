@@ -46,6 +46,8 @@ Document:
 
 Question: {{{question}}}
 
+Please provide a comprehensive legal answer based on the jurisdiction and any provided document context. If a document is provided, analyze it thoroughly and provide specific legal insights.
+
 Answer: `,
 });
 

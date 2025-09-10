@@ -68,7 +68,12 @@ export function ChatInterface() {
       const question = `In the jurisdiction of ${jurisdiction}, ${input}`;
       const documentDataUri = file ? await fileToDataUri(file) : undefined;
       
+      console.log('Sending request:', { question, hasFile: !!file, fileName: file?.name });
+      
       const result = await answerLegalQuestions({ question, documentDataUri });
+      
+      console.log('Received response:', result);
+      
       const aiMessage: Message = {
         id: Date.now() + 1,
         text: result.answer,
@@ -79,10 +84,12 @@ export function ChatInterface() {
       console.error('Chat error:', error);
       const userMessages = messages.filter((m) => m.id !== userMessage.id);
       setMessages(userMessages);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         variant: 'destructive',
         title: 'An error occurred',
-        description: 'Failed to get an answer. Please try again.',
+        description: `Failed to get an answer: ${errorMessage}`,
       });
 
     } finally {
